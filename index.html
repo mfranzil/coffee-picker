@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Contatore Caffè</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>☕ Contatore Caffè</h1>
+    <p>Seleziona le opzioni, premi il caffè, correggi in fondo.</p>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="summary" id="summary">
+    <h2>Ordine complessivo</h2>
+    <div class="total-line" id="total-line">Totale: 0</div>
+    <ul id="summary-list"></ul>
+    <div class="summary-actions">
+      <button id="copy-btn" class="btn-secondary">Copia ordine</button>
+      <button id="reset-btn" class="btn-danger">Azzera tutto</button>
+    </div>
+    <p id="copy-feedback" class="feedback" aria-live="polite"></p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
