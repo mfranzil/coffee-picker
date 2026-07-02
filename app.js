@@ -1,24 +1,24 @@
 const STORAGE_KEY = 'coffeeOrderStacks';
 
 const bases = [
-  { id: 'liscio', name: 'Liscio', color: '#6f4e37', variants: { deca: true, soia: false }, hasSize: false },
-  { id: 'macchiato', name: 'Macchiato', color: '#8d6e63', variants: { deca: true, soia: true }, hasSize: false },
-  { id: 'brutto', name: 'Brutto', color: '#4e342e', variants: { deca: true, soia: false }, hasSize: false },
-  { id: 'brutto-macchiato', name: 'Brutto Macchiato', color: '#5d4037', variants: { deca: true, soia: true }, hasSize: false },
-  { id: 'cappuccino', name: 'Cappuccino', color: '#a1887f', variants: { deca: true, soia: true }, hasSize: false },
-  { id: 'latte-macchiato', name: 'Latte macchiato', color: '#d7ccc8', variants: { deca: true, soia: true }, hasSize: false },
-  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#bcaaa4', variants: { deca: false, soia: false }, hasSize: false },
-  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', variants: { deca: false, soia: false }, hasSize: true }
+  { id: 'liscio', name: 'Liscio', color: '#6f4e37', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'macchiato', name: 'Macchiato', color: '#8d6e63', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
+  { id: 'lungo', name: 'Lungo', color: '#7b5e57', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'americano', name: 'Americano', color: '#5d4037', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'cappuccino', name: 'Cappuccino', color: '#a1887f', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
+  { id: 'latte-macchiato', name: 'Latte macchiato', color: '#d7ccc8', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
+  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#bcaaa4', variants: { deca: false, soia: false, brutto: true }, hasSize: false },
+  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', variants: { deca: false, soia: false, brutto: false }, hasSize: true }
 ];
 
-const variantOptions = ['deca', 'soia'];
-const sizeOptions = ['small', 'large'];
+const variantOptions = ['deca', 'soia', 'brutto'];
+const sizeOptions = ['piccola', 'grande'];
 
 let stacks = loadStacks();
 let selectedVariants = {};
 
 bases.forEach(b => {
-  selectedVariants[b.id] = { deca: false, soia: false, size: 'small' };
+  selectedVariants[b.id] = { deca: false, soia: false, brutto: false, size: 'piccola' };
 });
 selectedVariants.custom = { label: '' };
 
@@ -78,16 +78,17 @@ function variantKey(variants) {
 }
 
 function groupKey(base, item) {
-  if (base.hasSize) return item.size || 'small';
+  if (base.hasSize) return item.size || 'piccola';
   return variantKey(item);
 }
 
 function displayName(base, item) {
   const parts = [base.name];
-  if (base.hasSize) parts.push(item.size || 'small');
+  if (base.hasSize) parts.push(item.size || 'piccola');
   else {
     if (item.deca) parts.push('deca');
     if (item.soia) parts.push('soia');
+    if (item.brutto) parts.push('brutto');
   }
   return parts.join(' ');
 }
@@ -96,7 +97,8 @@ function effectiveOptions(base, selected) {
   if (base.hasSize) return { size: selected.size };
   return {
     deca: base.variants.deca && selected.deca,
-    soia: base.variants.soia && selected.soia
+    soia: base.variants.soia && selected.soia,
+    brutto: base.variants.brutto && selected.brutto
   };
 }
 
@@ -105,6 +107,7 @@ function nextLabel(base, selected) {
   const opts = [];
   if (base.variants.deca && selected.deca) opts.push('deca');
   if (base.variants.soia && selected.soia) opts.push('soia');
+  if (base.variants.brutto && selected.brutto) opts.push('brutto');
   if (opts.length > 0) return `prossimo: ${opts.join(' + ')}`;
   return 'prossimo: normale';
 }
@@ -129,6 +132,48 @@ function cupSvg(color, custom = false) {
       <path d="M50 14c0-8 5-14 10-14s5 10 5 14-5 10-5 10" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>
     </svg>
   `;
+}
+
+function createCupFlight(source) {
+  const icon = source?.querySelector('.cup') || source;
+  if (!icon) return null;
+  return {
+    rect: icon.getBoundingClientRect(),
+    node: icon.cloneNode(true)
+  };
+}
+
+function animateCoffeeToSummary(flight) {
+  if (!flight || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const summary = document.getElementById('summary');
+  if (!summary) return;
+
+  const end = summary.getBoundingClientRect();
+  const clone = flight.node;
+  clone.classList.add('flying-cup');
+  clone.style.left = `${flight.rect.left}px`;
+  clone.style.top = `${flight.rect.top}px`;
+  clone.style.width = `${flight.rect.width}px`;
+  clone.style.height = `${flight.rect.height}px`;
+  clone.style.opacity = '0.95';
+  clone.style.transform = 'translate(0, 0) scale(1)';
+
+  document.body.appendChild(clone);
+
+  requestAnimationFrame(() => {
+    const targetX = end.left + 18;
+    const targetY = end.top + 14;
+    clone.style.transform = `translate(${targetX - flight.rect.left}px, ${targetY - flight.rect.top}px) scale(0.72)`;
+    clone.style.opacity = '0.15';
+  });
+
+  const cleanup = () => {
+    if (clone.isConnected) clone.remove();
+  };
+
+  clone.addEventListener('transitionend', cleanup, { once: true });
+  setTimeout(cleanup, 700);
 }
 
 function renderGrid() {
@@ -208,10 +253,12 @@ function renderGrid() {
     plusBtn.setAttribute('aria-label', `Aggiungi ${base.name}`);
     plusBtn.innerHTML = '☕ +';
     plusBtn.addEventListener('click', () => {
+      const flight = createCupFlight(cup);
       pushItem(base.id, effectiveOptions(base, selected));
-      selectedVariants[base.id] = { deca: false, soia: false, size: 'small' };
+      selectedVariants[base.id] = { deca: false, soia: false, brutto: false, size: 'piccola' };
       renderGrid();
       renderSummary();
+      animateCoffeeToSummary(flight);
     });
 
     right.appendChild(plusBtn);
@@ -276,9 +323,11 @@ function renderCustomCard() {
   plusBtn.addEventListener('click', () => {
     const name = selected.label.trim();
     if (!name) return;
+    const flight = createCupFlight(cup);
     pushItem('custom', { label: name });
     renderGrid();
     renderSummary();
+    animateCoffeeToSummary(flight);
   });
 
   right.appendChild(plusBtn);
@@ -334,7 +383,8 @@ function aggregateStacks() {
 function parseVariantKey(key) {
   return {
     deca: key.includes('deca'),
-    soia: key.includes('soia')
+    soia: key.includes('soia'),
+    brutto: key.includes('brutto')
   };
 }
 
