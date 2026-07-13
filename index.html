@@ -15,6 +15,7 @@
   <main class="grid" id="grid"></main>
 
   <section class="summary" id="summary">
+    <button id="close-summary" class="close-btn" aria-label="Chiudi ordine">✕</button>
     <h2>Ordine complessivo</h2>
     <div class="total-line" id="total-line">Totale: 0</div>
     <ul id="summary-list"></ul>
@@ -24,6 +25,11 @@
     </div>
     <p id="copy-feedback" class="feedback" aria-live="polite"></p>
   </section>
+
+  <button id="fab" class="fab" aria-label="Mostra ordine">
+    <span class="fab-icon">☕</span>
+    <span id="fab-count" class="fab-count">0</span>
+  </button>
 
   <script src="app.js"></script>
 </body>

@@ -2,13 +2,14 @@ const STORAGE_KEY = 'coffeeOrderStacks';
 
 const bases = [
   { id: 'liscio', name: 'Liscio', color: '#6f4e37', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'macchiato', name: 'Macchiato', color: '#8d6e63', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
-  { id: 'lungo', name: 'Lungo', color: '#7b5e57', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'americano', name: 'Americano', color: '#5d4037', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'macchiato', name: 'Macchiato', color: '#ffe6cf', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
+  { id: 'lungo', name: 'Lungo', color: '#7e4335', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'americano', name: 'Americano', color: '#371f17', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'tè', name: 'Tè', color: '#fdcc4f', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
+  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#d4a87f', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
   { id: 'cappuccino', name: 'Cappuccino', color: '#a1887f', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
   { id: 'latte-macchiato', name: 'Latte macchiato', color: '#d7ccc8', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
-  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#bcaaa4', variants: { deca: false, soia: false, brutto: true }, hasSize: false },
-  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', variants: { deca: false, soia: false, brutto: false }, hasSize: true }
+  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', variants: { deca: false, soia: false, brutto: false }, hasSize: true, feminine: true },
 ];
 
 const variantOptions = ['deca', 'soia', 'brutto'];
@@ -103,13 +104,19 @@ function effectiveOptions(base, selected) {
 }
 
 function nextLabel(base, selected) {
-  if (base.hasSize) return `prossimo: ${selected.size}`;
+  let keyword;
+  if (base.feminine) {
+    keyword = 'prossima'
+  } else {
+    keyword = 'prossimo'
+  }
+  if (base.hasSize) return `${keyword}: ${selected.size}`;
   const opts = [];
   if (base.variants.deca && selected.deca) opts.push('deca');
   if (base.variants.soia && selected.soia) opts.push('soia');
   if (base.variants.brutto && selected.brutto) opts.push('brutto');
-  if (opts.length > 0) return `prossimo: ${opts.join(' + ')}`;
-  return 'prossimo: normale';
+  if (opts.length > 0) return `${keyword}: ${opts.join(' + ')}`;
+  return `${keyword}: normale`;
 }
 
 function cupSvg(color, custom = false) {
@@ -143,13 +150,20 @@ function createCupFlight(source) {
   };
 }
 
+function animatePress(element) {
+  if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  element.classList.add('pressed');
+  element.addEventListener('animationend', () => element.classList.remove('pressed'), { once: true });
+  setTimeout(() => element.classList.remove('pressed'), 350);
+}
+
 function animateCoffeeToSummary(flight) {
   if (!flight || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const summary = document.getElementById('summary');
-  if (!summary) return;
+  const target = document.getElementById('fab');
+  if (!target) return;
 
-  const end = summary.getBoundingClientRect();
+  const end = target.getBoundingClientRect();
   const clone = flight.node;
   clone.classList.add('flying-cup');
   clone.style.left = `${flight.rect.left}px`;
@@ -162,10 +176,10 @@ function animateCoffeeToSummary(flight) {
   document.body.appendChild(clone);
 
   requestAnimationFrame(() => {
-    const targetX = end.left + 18;
-    const targetY = end.top + 14;
-    clone.style.transform = `translate(${targetX - flight.rect.left}px, ${targetY - flight.rect.top}px) scale(0.72)`;
-    clone.style.opacity = '0.15';
+    const targetX = end.left + end.width / 2 - flight.rect.width / 2;
+    const targetY = end.top + end.height / 2 - flight.rect.height / 2;
+    clone.style.transform = `translate(${targetX - flight.rect.left}px, ${targetY - flight.rect.top}px) scale(0.35)`;
+    clone.style.opacity = '0.1';
   });
 
   const cleanup = () => {
@@ -210,6 +224,7 @@ function renderGrid() {
         chip.textContent = opt;
         chip.setAttribute('aria-pressed', String(selected.size === opt));
         chip.addEventListener('click', () => {
+          animatePress(chip);
           selected.size = opt;
           renderGrid();
           renderSummary();
@@ -228,6 +243,7 @@ function renderGrid() {
         chip.textContent = opt;
         chip.setAttribute('aria-pressed', String(selected[opt]));
         chip.addEventListener('click', () => {
+          animatePress(chip);
           selected[opt] = !selected[opt];
           renderGrid();
           renderSummary();
@@ -237,10 +253,12 @@ function renderGrid() {
       info.appendChild(chips);
     }
 
-    const label = document.createElement('p');
-    label.className = 'variant-label';
-    label.textContent = nextLabel(base, selected);
-    info.appendChild(label);
+    if (base.hasSize || base.variants.deca || base.variants.soia || base.variants.brutto) {
+      const label = document.createElement('p');
+      label.className = 'variant-label';
+      label.textContent = nextLabel(base, selected);
+      info.appendChild(label);
+    }
 
     left.appendChild(cup);
     left.appendChild(info);
@@ -253,6 +271,7 @@ function renderGrid() {
     plusBtn.setAttribute('aria-label', `Aggiungi ${base.name}`);
     plusBtn.innerHTML = '☕ +';
     plusBtn.addEventListener('click', () => {
+      animatePress(plusBtn);
       const flight = createCupFlight(cup);
       pushItem(base.id, effectiveOptions(base, selected));
       selectedVariants[base.id] = { deca: false, soia: false, brutto: false, size: 'piccola' };
@@ -294,7 +313,7 @@ function renderCustomCard() {
   const input = document.createElement('input');
   input.className = 'custom-input';
   input.type = 'text';
-  input.placeholder = 'es. Cappuccino, Latte macchiato, Tisana…';
+  input.placeholder = 'es. Macchiato latte di mandorla, tisana, etc...';
   input.value = selected.label;
   input.addEventListener('input', () => {
     selected.label = input.value;
@@ -321,6 +340,7 @@ function renderCustomCard() {
   plusBtn.innerHTML = '☕ +';
   plusBtn.disabled = selected.label.trim() === '';
   plusBtn.addEventListener('click', () => {
+    animatePress(plusBtn);
     const name = selected.label.trim();
     if (!name) return;
     const flight = createCupFlight(cup);
@@ -391,10 +411,12 @@ function parseVariantKey(key) {
 function renderSummary() {
   const list = document.getElementById('summary-list');
   const totalLine = document.getElementById('total-line');
+  const fabCount = document.getElementById('fab-count');
   list.innerHTML = '';
 
   const { entries, total } = aggregateStacks();
   totalLine.textContent = `Totale: ${total} ☕`;
+  if (fabCount) fabCount.textContent = String(total);
 
   if (entries.length === 0) {
     const li = document.createElement('li');
@@ -422,6 +444,7 @@ function renderSummary() {
     removeBtn.setAttribute('aria-label', `Rimuovi un ${entry.name}`);
     removeBtn.textContent = '−';
     removeBtn.addEventListener('click', () => {
+      animatePress(removeBtn);
       if (entry.id === 'custom') {
         removeLastCustom(entry.label);
       } else {
@@ -472,6 +495,22 @@ function resetAll() {
   }
 }
 
+function openSummary() {
+  const summary = document.getElementById('summary');
+  if (summary) summary.classList.add('open');
+}
+
+function closeSummary() {
+  const summary = document.getElementById('summary');
+  if (summary) summary.classList.remove('open');
+}
+
+function toggleSummary() {
+  const summary = document.getElementById('summary');
+  if (!summary) return;
+  summary.classList.toggle('open');
+}
+
 function render() {
   renderGrid();
   renderSummary();
@@ -479,6 +518,23 @@ function render() {
 
 document.addEventListener('DOMContentLoaded', () => {
   render();
-  document.getElementById('copy-btn').addEventListener('click', copyOrder);
-  document.getElementById('reset-btn').addEventListener('click', resetAll);
+  document.getElementById('copy-btn').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    copyOrder();
+  });
+  document.getElementById('reset-btn').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    resetAll();
+  });
+  document.getElementById('fab').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    toggleSummary();
+  });
+  document.getElementById('close-summary').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    closeSummary();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSummary();
+  });
 });
