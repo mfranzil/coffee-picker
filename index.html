@@ -15,21 +15,26 @@
   <main class="grid" id="grid"></main>
 
   <section class="summary" id="summary">
-    <button id="close-summary" class="close-btn" aria-label="Chiudi ordine">✕</button>
+    <button id="close-summary" class="btn btn-ghost btn-square close-btn" aria-label="Chiudi ordine">✕</button>
     <h2>Ordine complessivo</h2>
     <div class="total-line" id="total-line">Totale: 0</div>
     <ul id="summary-list"></ul>
     <div class="summary-actions">
-      <button id="copy-btn" class="btn-secondary">Copia ordine</button>
-      <button id="reset-btn" class="btn-danger">Azzera tutto</button>
+      <button id="copy-btn" class="btn btn-secondary">Copia ordine</button>
+      <button id="reset-btn" class="btn btn-danger">Azzera tutto</button>
     </div>
     <p id="copy-feedback" class="feedback" aria-live="polite"></p>
   </section>
 
-  <button id="fab" class="fab" aria-label="Mostra ordine">
+  <button id="fab" class="btn btn-primary btn-pill fab" aria-label="Mostra ordine">
     <span class="fab-icon">☕</span>
     <span id="fab-count" class="fab-count">0</span>
   </button>
+
+  <div id="onboarding" class="onboarding" role="status" aria-live="polite">
+    <span class="onboarding-text">Stai cercando il recap dei caffè? È stato spostato qua!</span>
+    <span class="onboarding-arrow" aria-hidden="true"></span>
+  </div>
 
   <script src="app.js"></script>
 </body>

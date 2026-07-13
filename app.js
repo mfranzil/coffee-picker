@@ -1,15 +1,16 @@
 const STORAGE_KEY = 'coffeeOrderStacks';
+const ONBOARDING_KEY = 'coffeePickerOnboardingSeen';
 
 const bases = [
-  { id: 'liscio', name: 'Liscio', color: '#6f4e37', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'macchiato', name: 'Macchiato', color: '#ffe6cf', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
-  { id: 'lungo', name: 'Lungo', color: '#7e4335', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'americano', name: 'Americano', color: '#371f17', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'tè', name: 'Tè', color: '#fdcc4f', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
-  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#d4a87f', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
-  { id: 'cappuccino', name: 'Cappuccino', color: '#a1887f', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
-  { id: 'latte-macchiato', name: 'Latte macchiato', color: '#d7ccc8', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
-  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', variants: { deca: false, soia: false, brutto: false }, hasSize: true, feminine: true },
+  { id: 'liscio', name: 'Liscio', color: '#6f4e37', surfaceColor: '#a88a80', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'macchiato', name: 'Macchiato', color: '#6f4e37', surfaceColor: '#fff3e0', cupSize: 'sm', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
+  { id: 'lungo', name: 'Lungo', color: '#6f4e37', surfaceColor: '#4d2e23', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'americano', name: 'Americano', color: '#371f17', surfaceColor: '#5d4037', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'tè', name: 'Tè', color: '#fdcc4f', surfaceColor: '#ffecb3', cupSize: 'sm', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
+  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#d4a87f', surfaceColor: '#efebe9', cupSize: 'sm', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
+  { id: 'cappuccino', name: 'Cappuccino', color: '#6f4e37', surfaceColor: '#e2c08a', cupSize: 'lg', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
+  { id: 'latte-macchiato', name: 'Latte macchiato', color: '#6f4e37', surfaceColor: '#fff3e0', cupSize: 'lg', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
+  { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', surfaceColor: '#bcaaa4', cupSize: 'sm', cold: true, variants: { deca: false, soia: false, brutto: false }, hasSize: true, feminine: true },
 ];
 
 const variantOptions = ['deca', 'soia', 'brutto'];
@@ -119,24 +120,65 @@ function nextLabel(base, selected) {
   return `${keyword}: normale`;
 }
 
-function cupSvg(color, custom = false) {
-  const gradientId = `steam-${color.replace('#', '')}`;
-  const bodyPath = custom
-    ? `<path d="M18 28h50v8c0 22-11 40-25 40S18 58 18 36v-8z" fill="${color}"/>`
-    : `<path d="M18 30h50v6c0 24-11 42-25 42S18 60 18 36v-6z" fill="${color}"/>`;
-  return `
-    <svg class="cup" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
+let cupSvgIdCounter = 0;
+
+function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom = false, cold = false }) {
+  const outlineColor = '#3e2723';
+  const steamColor = '#8d6e63';
+  const gradientId = `steam-${++cupSvgIdCounter}`;
+
+  if (custom) {
+    return `
+      <svg class="cup cup-${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M30 28h40l-5 44H35z" fill="${color}" stroke="${outlineColor}" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="26" y="20" width="48" height="12" rx="4" fill="${surfaceColor || cupColor}" stroke="${outlineColor}" stroke-width="2"/>
+      </svg>
+    `;
+  }
+
+  const isLarge = size === 'lg';
+
+  const bodyPath = isLarge
+    ? `<path d="M14 38c0 18 13 34 29 34s29-16 29-34A29 8 0 0 0 14 38z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="2"/>`
+    : `<path d="M24 32c0 22 9 40 19 40s19-18 19-40A19 6 0 0 0 24 32z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="2"/>`;
+
+  const liquidPath = isLarge
+    ? `<path d="M16 40c0 16 12 30 27 30s27-14 27-30A27 7 0 0 0 16 40z" fill="${color}"/>`
+    : `<path d="M26 34c0 20 8 34 17 34s17-14 17-34A17 5 0 0 0 26 34z" fill="${color}"/>`;
+
+  const surface = isLarge
+    ? `<ellipse cx="43" cy="40" rx="27" ry="7" fill="${surfaceColor || color}"/>`
+    : `<ellipse cx="43" cy="34" rx="17" ry="5" fill="${surfaceColor || color}"/>`;
+
+  const handle = cold
+    ? ''
+    : (isLarge
+      ? `<path d="M74 44h10c7 0 12 5 12 11s-5 11-12 11h-6" fill="none" stroke="${outlineColor}" stroke-width="5" stroke-linecap="round"/>`
+      : `<path d="M64 38h10c7 0 12 5 12 12s-5 12-12 12h-6" fill="none" stroke="${outlineColor}" stroke-width="5" stroke-linecap="round"/>`);
+
+  const steam = cold
+    ? ''
+    : (isLarge
+      ? `<path d="M34 20c0-7 4-13 8-13s4 9 4 13-4 9-4 9 M50 16c0-9 5-15 10-15s5 11 5 15-5 11-5 11" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>`
+      : `<path d="M34 18c0-6 4-12 8-12s4 8 4 12-4 8-4 8 M50 14c0-8 5-14 10-14s5 10 5 14-5 10-5 10" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>`);
+
+  const defs = cold
+    ? ''
+    : `<defs>
         <linearGradient id="${gradientId}" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stop-color="${color}" stop-opacity="0.4"/>
-          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+          <stop offset="0%" stop-color="${steamColor}" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="${steamColor}" stop-opacity="0"/>
         </linearGradient>
-      </defs>
-      <path d="M70 40h12c8 0 14 6 14 14s-6 14-14 14h-8" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round"/>
+      </defs>`;
+
+  return `
+    <svg class="cup cup-${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      ${defs}
       ${bodyPath}
-      <ellipse cx="43" cy="30" rx="25" ry="8" fill="#d7ccc8"/>
-      <path d="M30 18c0-6 4-12 8-12s4 8 4 12-4 8-4 8" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>
-      <path d="M50 14c0-8 5-14 10-14s5 10 5 14-5 10-5 10" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>
+      ${liquidPath}
+      ${surface}
+      ${handle}
+      ${steam}
     </svg>
   `;
 }
@@ -204,7 +246,8 @@ function renderGrid() {
     left.className = 'card-left';
 
     const cup = document.createElement('div');
-    cup.innerHTML = cupSvg(base.color);
+    cup.className = 'cup-container';
+    cup.innerHTML = cupSvg({ color: base.color, surfaceColor: base.surfaceColor, size: base.cupSize, cold: base.cold });
 
     const info = document.createElement('div');
     info.className = 'card-info';
@@ -220,7 +263,7 @@ function renderGrid() {
       chips.className = 'chips';
       sizeOptions.forEach(opt => {
         const chip = document.createElement('button');
-        chip.className = 'chip';
+        chip.className = 'btn btn-ghost btn-pill btn-sm chip';
         chip.textContent = opt;
         chip.setAttribute('aria-pressed', String(selected.size === opt));
         chip.addEventListener('click', () => {
@@ -239,7 +282,7 @@ function renderGrid() {
         const allowed = base.variants[opt];
         if (!allowed) return;
         const chip = document.createElement('button');
-        chip.className = 'chip';
+        chip.className = 'btn btn-ghost btn-pill btn-sm chip';
         chip.textContent = opt;
         chip.setAttribute('aria-pressed', String(selected[opt]));
         chip.addEventListener('click', () => {
@@ -253,7 +296,7 @@ function renderGrid() {
       info.appendChild(chips);
     }
 
-    if (base.hasSize || base.variants.deca || base.variants.soia || base.variants.brutto) {
+    if ((base.hasSize || base.variants.deca || base.variants.soia || base.variants.brutto)) {
       const label = document.createElement('p');
       label.className = 'variant-label';
       label.textContent = nextLabel(base, selected);
@@ -267,7 +310,7 @@ function renderGrid() {
     right.className = 'card-right';
 
     const plusBtn = document.createElement('button');
-    plusBtn.className = 'btn-plus';
+    plusBtn.className = 'btn btn-primary btn-lg btn-icon';
     plusBtn.setAttribute('aria-label', `Aggiungi ${base.name}`);
     plusBtn.innerHTML = '☕ +';
     plusBtn.addEventListener('click', () => {
@@ -301,7 +344,8 @@ function renderCustomCard() {
   left.className = 'card-left';
 
   const cup = document.createElement('div');
-  cup.innerHTML = cupSvg('#607d8b', true);
+  cup.className = 'cup-container';
+  cup.innerHTML = cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
 
   const info = document.createElement('div');
   info.className = 'card-info';
@@ -323,11 +367,6 @@ function renderCustomCard() {
   info.appendChild(title);
   info.appendChild(input);
 
-  const label = document.createElement('p');
-  label.className = 'variant-label';
-  label.textContent = 'prossimo: custom';
-  info.appendChild(label);
-
   left.appendChild(cup);
   left.appendChild(info);
 
@@ -335,7 +374,7 @@ function renderCustomCard() {
   right.className = 'card-right';
 
   const plusBtn = document.createElement('button');
-  plusBtn.className = 'btn-plus';
+  plusBtn.className = 'btn btn-primary btn-lg btn-icon';
   plusBtn.setAttribute('aria-label', 'Aggiungi custom');
   plusBtn.innerHTML = '☕ +';
   plusBtn.disabled = selected.label.trim() === '';
@@ -440,7 +479,7 @@ function renderSummary() {
     countSpan.textContent = `${entry.count}×`;
 
     const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-btn';
+    removeBtn.className = 'btn btn-danger btn-square btn-sm';
     removeBtn.setAttribute('aria-label', `Rimuovi un ${entry.name}`);
     removeBtn.textContent = '−';
     removeBtn.addEventListener('click', () => {
@@ -511,6 +550,33 @@ function toggleSummary() {
   summary.classList.toggle('open');
 }
 
+function shouldShowOnboarding() {
+  try {
+    return localStorage.getItem(ONBOARDING_KEY) !== 'true';
+  } catch {
+    return true;
+  }
+}
+
+function dismissOnboarding() {
+  const tip = document.getElementById('onboarding');
+  if (!tip || tip.classList.contains('hidden')) return;
+  tip.classList.add('hidden');
+  try {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+  } catch {}
+}
+
+function setupOnboardingDismissal() {
+  const handler = (e) => {
+    if (e.target.closest('button, input')) {
+      dismissOnboarding();
+      document.removeEventListener('click', handler);
+    }
+  };
+  document.addEventListener('click', handler);
+}
+
 function render() {
   renderGrid();
   renderSummary();
@@ -518,6 +584,10 @@ function render() {
 
 document.addEventListener('DOMContentLoaded', () => {
   render();
+  setupOnboardingDismissal();
+  if (!shouldShowOnboarding()) {
+    document.getElementById('onboarding')?.classList.add('hidden');
+  }
   document.getElementById('copy-btn').addEventListener('click', (e) => {
     animatePress(e.currentTarget);
     copyOrder();
