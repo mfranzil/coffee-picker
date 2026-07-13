@@ -5,11 +5,11 @@ const bases = [
   { id: 'liscio', name: 'Liscio', color: '#6f4e37', surfaceColor: '#a88a80', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
   { id: 'macchiato', name: 'Macchiato', color: '#6f4e37', surfaceColor: '#fff3e0', cupSize: 'sm', variants: { deca: true, soia: true, brutto: true }, hasSize: false },
   { id: 'lungo', name: 'Lungo', color: '#6f4e37', surfaceColor: '#4d2e23', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'americano', name: 'Americano', color: '#371f17', surfaceColor: '#5d4037', cupSize: 'sm', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
-  { id: 'tè', name: 'Tè', color: '#fdcc4f', surfaceColor: '#ffecb3', cupSize: 'sm', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
-  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#d4a87f', surfaceColor: '#efebe9', cupSize: 'sm', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
   { id: 'cappuccino', name: 'Cappuccino', color: '#6f4e37', surfaceColor: '#e2c08a', cupSize: 'lg', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
   { id: 'latte-macchiato', name: 'Latte macchiato', color: '#6f4e37', surfaceColor: '#fff3e0', cupSize: 'lg', variants: { deca: true, soia: true, brutto: false }, hasSize: false },
+  { id: 'americano', name: 'Americano', color: '#371f17', surfaceColor: '#5d4037', cupSize: 'lg', variants: { deca: true, soia: false, brutto: true }, hasSize: false },
+  { id: 'tè', name: 'Tè', color: '#f1dfb0', surfaceColor: '#f1d387', cupSize: 'lg', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
+  { id: 'caffe-dorzo', name: "Caffè d'orzo", color: '#d4a87f', surfaceColor: '#efebe9', cupSize: 'sm', variants: { deca: false, soia: false, brutto: false }, hasSize: false },
   { id: 'crema-caffe', name: 'Crema caffè', color: '#8d6e63', surfaceColor: '#bcaaa4', cupSize: 'sm', cold: true, variants: { deca: false, soia: false, brutto: false }, hasSize: true, feminine: true },
 ];
 
@@ -352,7 +352,7 @@ function renderCustomCard() {
 
   const title = document.createElement('h2');
   title.className = 'card-title';
-  title.textContent = 'Custom';
+  title.textContent = 'Altro';
 
   const input = document.createElement('input');
   input.className = 'custom-input';
