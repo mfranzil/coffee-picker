@@ -445,6 +445,76 @@ body {
   flex: 1;
 }
 
+.pay-btn {
+  width: 100%;
+  margin-top: var(--space-lg);
+}
+
+.pay-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(62, 39, 35, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.pay-modal.hidden {
+  display: none;
+}
+
+.pay-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  padding: var(--space-xl) var(--space-lg);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.pay-card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.pay-cup {
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-cup .cup {
+  width: 84px;
+  height: 84px;
+}
+
+.pay-drink {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  min-height: 1.4em;
+}
+
+.pay-drink.revealed {
+  animation: press-pop 0.35s ease;
+}
+
+.pay-tiebreak {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  min-height: 1.3em;
+}
+
 .feedback {
   margin: var(--space-sm) 0 0;
   font-size: 1rem;

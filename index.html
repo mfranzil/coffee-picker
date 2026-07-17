@@ -19,6 +19,7 @@
     <h2>Ordine complessivo</h2>
     <div class="total-line" id="total-line">Totale: 0</div>
     <ul id="summary-list"></ul>
+    <button id="pay-btn" class="btn btn-primary pay-btn">🎲 Chi paga?</button>
     <div class="summary-actions">
       <button id="copy-btn" class="btn btn-secondary">Copia ordine</button>
       <button id="reset-btn" class="btn btn-danger">Azzera tutto</button>
@@ -30,6 +31,17 @@
     <span class="fab-icon">☕</span>
     <span id="fab-count" class="fab-count">0</span>
   </button>
+
+  <div id="pay-modal" class="pay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="pay-title">
+    <div class="pay-card">
+      <button id="close-pay" class="btn btn-ghost btn-square close-btn" aria-label="Chiudi estrazione">✕</button>
+      <h2 id="pay-title">Chi paga?</h2>
+      <div id="pay-cup" class="pay-cup"></div>
+      <div id="pay-drink" class="pay-drink" aria-live="polite">…</div>
+      <p id="pay-tiebreak" class="pay-tiebreak"></p>
+      <button id="pay-again" class="btn btn-secondary">Ripeti estrazione</button>
+    </div>
+  </div>
 
   <div id="onboarding" class="onboarding" role="status" aria-live="polite">
     <span class="onboarding-text">Stai cercando il recap dei caffè? È stato spostato qua!</span>

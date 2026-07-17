@@ -13,6 +13,8 @@ Coffee Counter tracks and aggregates group coffee orders into a compiled, easily
 
 Once you are satisfied with your order, you can copy the finalized count directly to your clipboard with a single click.
 
+Can't decide who pays? The **Chi paga?** button draws a random cup from the order (every cup counts as one raffle ticket). If the drawn drink appears more than once, the app rolls a count-off, for example *"counting clockwise from whoever is closest to the counter, number 2 pays"*
+
 ## Run it
 
 Because this project is built entirely with basic web technologies, there are no compilers, dependencies, or build scripts needed:
