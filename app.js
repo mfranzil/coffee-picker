@@ -457,6 +457,9 @@ function renderSummary() {
   totalLine.textContent = `Totale: ${total} ☕`;
   if (fabCount) fabCount.textContent = String(total);
 
+  const payBtn = document.getElementById('pay-btn');
+  if (payBtn) payBtn.disabled = total === 0;
+
   if (entries.length === 0) {
     const li = document.createElement('li');
     const span = document.createElement('span');
@@ -522,6 +525,89 @@ function copyOrder() {
   }).catch(() => {
     feedback.textContent = 'Copia non riuscita.';
   });
+}
+
+const tiebreakStarts = [
+  'da chi è più lontano dal bancone',
+  'da chi è arrivato per ultimo',
+  'da chi ha ancora il telefono in mano'
+];
+
+function buildTicketPool() {
+  const pool = [];
+  bases.forEach(base => {
+    (stacks[base.id] || []).forEach(item => {
+      pool.push({
+        base,
+        name: displayName(base, item),
+        groupId: `${base.id}|${groupKey(base, item)}`
+      });
+    });
+  });
+  (stacks.custom || []).forEach(item => {
+    pool.push({ base: null, name: item.label, groupId: `custom|${item.label}` });
+  });
+  return pool;
+}
+
+let paySpinning = false;
+
+function openPayModal() {
+  document.getElementById('pay-modal').classList.remove('hidden');
+}
+
+function closePayModal() {
+  document.getElementById('pay-modal').classList.add('hidden');
+}
+
+function runPayDraw() {
+  if (paySpinning) return;
+  const pool = buildTicketPool();
+  if (pool.length === 0) return;
+
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  const groupCount = pool.filter(t => t.groupId === winner.groupId).length;
+
+  const cupEl = document.getElementById('pay-cup');
+  const drinkEl = document.getElementById('pay-drink');
+  const tiebreakEl = document.getElementById('pay-tiebreak');
+
+  cupEl.innerHTML = '';
+  tiebreakEl.textContent = '';
+  drinkEl.classList.remove('revealed');
+  drinkEl.textContent = '…';
+  openPayModal();
+
+  const reveal = () => {
+    paySpinning = false;
+    drinkEl.textContent = winner.name;
+    drinkEl.classList.add('revealed');
+    cupEl.innerHTML = winner.base
+      ? cupSvg({ color: winner.base.color, surfaceColor: winner.base.surfaceColor, size: winner.base.cupSize, cold: winner.base.cold })
+      : cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
+    if (groupCount > 1) {
+      const n = 1 + Math.floor(Math.random() * groupCount);
+      const start = tiebreakStarts[Math.floor(Math.random() * tiebreakStarts.length)];
+      tiebreakEl.textContent = `Compare ${groupCount} volte nell'ordine: contando in senso orario ${start}, paga il numero ${n}!`;
+    } else {
+      tiebreakEl.textContent = "Nessun dubbio: paga chi l'ha ordinato!";
+    }
+  };
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || pool.length < 2) {
+    reveal();
+    return;
+  }
+
+  paySpinning = true;
+  let delay = 60;
+  const spin = () => {
+    drinkEl.textContent = pool[Math.floor(Math.random() * pool.length)].name;
+    delay *= 1.25;
+    if (delay < 450) setTimeout(spin, delay);
+    else setTimeout(reveal, delay);
+  };
+  spin();
 }
 
 function resetAll() {
@@ -604,7 +690,27 @@ document.addEventListener('DOMContentLoaded', () => {
     animatePress(e.currentTarget);
     closeSummary();
   });
+  document.getElementById('pay-btn').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    runPayDraw();
+  });
+  document.getElementById('pay-again').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    runPayDraw();
+  });
+  document.getElementById('close-pay').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    closePayModal();
+  });
+  document.getElementById('pay-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closePayModal();
+  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSummary();
+    if (e.key !== 'Escape') return;
+    if (!document.getElementById('pay-modal').classList.contains('hidden')) {
+      closePayModal();
+    } else {
+      closeSummary();
+    }
   });
 });
