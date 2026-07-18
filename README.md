@@ -4,6 +4,8 @@ Ever went at the bar with a group of friends and found yourself struggling to ke
 
 Coffee Counter tracks and aggregates group coffee orders into a compiled, easily copyable text summary.
 
+<img src="./screenshot.png" align="center" width="500" alt="Coffee Counter Screenshot">
+
 ## Features
 
 - An interactive menu with predefined coffee choices (for Italian folks, mostly) and the ability to add custom entries:
@@ -21,3 +23,5 @@ Because this project is built entirely with basic web technologies, there are no
 
 1. Clone or download this repository to your computer.
 2. Double-click or open the `index.html` file in any modern web browser.
+
+A GitHub Pages version of the app is also available at [https://coffee.mfranzil.com/](https://coffee.mfranzil.com/).
