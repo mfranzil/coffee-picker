@@ -17,6 +17,9 @@ const variantOptions = ['deca', 'soia', 'brutto'];
 const sizeOptions = ['piccola', 'grande'];
 const pastryOptions = ['vuoto', 'crema', 'cioccolato', 'pistacchio'];
 
+const cupColor = '#607d8b';
+const cupSurfaceColor = '#252c30';
+
 const pastries = [
   { id: 'cornetto', name: 'Cornetto', color: '#f4c542', isPastry: true }
 ];
@@ -142,8 +145,8 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
   if (custom) {
     return `
       <svg class="cup cup-${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M30 28h40l-5 44H35z" fill="${color}" stroke="${outlineColor}" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="26" y="20" width="48" height="12" rx="4" fill="${surfaceColor || cupColor}" stroke="${outlineColor}" stroke-width="2"/>
+        <path d="M30 28h40l-5 44H35z" fill="${color}" stroke="${outlineColor}" stroke-width="0" stroke-linejoin="round"/>
+        <rect x="26" y="20" width="48" height="12" rx="4" fill="${surfaceColor || cupColor}" stroke="${outlineColor}" stroke-width="0"/>
       </svg>
     `;
   }
@@ -151,8 +154,8 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
   const isLarge = size === 'lg';
 
   const bodyPath = isLarge
-    ? `<path d="M14 38c0 18 13 34 29 34s29-16 29-34A29 8 0 0 0 14 38z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="2"/>`
-    : `<path d="M24 32c0 22 9 40 19 40s19-18 19-40A19 6 0 0 0 24 32z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="2"/>`;
+    ? `<path d="M14 38c0 18 13 34 29 34s29-16 29-34A29 8 0 0 0 14 38z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="0"/>`
+    : `<path d="M24 32c0 22 9 40 19 40s19-18 19-40A19 6 0 0 0 24 32z" fill="${cupColor}" stroke="${outlineColor}" stroke-width="0"/>`;
 
   const liquidPath = isLarge
     ? `<path d="M16 40c0 16 12 30 27 30s27-14 27-30A27 7 0 0 0 16 40z" fill="${color}"/>`
@@ -162,11 +165,25 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
     ? `<ellipse cx="43" cy="40" rx="27" ry="7" fill="${surfaceColor || color}"/>`
     : `<ellipse cx="43" cy="34" rx="17" ry="5" fill="${surfaceColor || color}"/>`;
 
-  const handle = cold
-    ? ''
-    : (isLarge
-      ? `<path d="M74 44h10c7 0 12 5 12 11s-5 11-12 11h-6" fill="none" stroke="${outlineColor}" stroke-width="5" stroke-linecap="round"/>`
-      : `<path d="M64 38h10c7 0 12 5 12 12s-5 12-12 12h-6" fill="none" stroke="${outlineColor}" stroke-width="5" stroke-linecap="round"/>`);
+    const handle = cold
+  ? ''
+  : (isLarge
+    ? `<path
+        d="M71 46h5c6 0 9 3 9 7.5S82 61 76 61h-5"
+        fill="none"
+        stroke="${outlineColor}"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />`
+    : `<path
+        d="M61 41h5c5 0 8 2.5 8 6.5S71 54 66 54h-5"
+        fill="none"
+        stroke="${outlineColor}"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />`);
 
   const steam = cold
     ? ''
@@ -207,16 +224,11 @@ function cornettoSvg({ color = '#f6c542' } = {}) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <!--
-        Reduce only the vertical proportions:
-        newY = 20 + originalY × 0.6
-      -->
       <g
-        transform="translate(0 20) scale(1 0.6)"
+        transform="translate(0 10) scale(1 0.7)"
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <!-- Croissant body -->
         <path
           d="
             M8 66
@@ -233,12 +245,55 @@ function cornettoSvg({ color = '#f6c542' } = {}) {
             Z
           "
           fill="${color}"
-          stroke="${outlineColor}"
-          stroke-width="2.5"
           vector-effect="non-scaling-stroke"
         />
 
-        <!-- Soft baked highlight -->
+        <path
+          d="M17 69 C17 61 19 55 23 49"
+          fill="none"
+          stroke="${detailColor}"
+          stroke-width="1.4"
+          opacity="0.8"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M83 69 C83 61 81 55 77 49"
+          fill="none"
+          stroke="${detailColor}"
+          stroke-width="1.4"
+          opacity="0.8"
+          vector-effect="non-scaling-stroke"
+        />
+
+        <path
+          d="M28 25 C35 33 38 42 38 50"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="1.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M42 19 C45 29 46 39 45 49"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="1.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M58 19 C55 29 54 39 55 49"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="1.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M72 25 C65 33 62 42 62 50"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="1.4"
+          vector-effect="non-scaling-stroke"
+        />
+
         <path
           d="
             M15 55
@@ -251,53 +306,6 @@ function cornettoSvg({ color = '#f6c542' } = {}) {
           stroke="none"
         />
 
-        <!-- Pastry segment lines -->
-        <path
-          d="M28 25 C35 33 38 42 38 50"
-          fill="none"
-          stroke="${seamColor}"
-          stroke-width="2.4"
-          vector-effect="non-scaling-stroke"
-        />
-        <path
-          d="M42 19 C45 29 46 39 45 49"
-          fill="none"
-          stroke="${seamColor}"
-          stroke-width="2.4"
-          vector-effect="non-scaling-stroke"
-        />
-        <path
-          d="M58 19 C55 29 54 39 55 49"
-          fill="none"
-          stroke="${seamColor}"
-          stroke-width="2.4"
-          vector-effect="non-scaling-stroke"
-        />
-        <path
-          d="M72 25 C65 33 62 42 62 50"
-          fill="none"
-          stroke="${seamColor}"
-          stroke-width="2.4"
-          vector-effect="non-scaling-stroke"
-        />
-
-        <!-- End shaping -->
-        <path
-          d="M17 69 C17 61 19 55 23 49"
-          fill="none"
-          stroke="${detailColor}"
-          stroke-width="1.5"
-          opacity="0.8"
-          vector-effect="non-scaling-stroke"
-        />
-        <path
-          d="M83 69 C83 61 81 55 77 49"
-          fill="none"
-          stroke="${detailColor}"
-          stroke-width="1.5"
-          opacity="0.8"
-          vector-effect="non-scaling-stroke"
-        />
       </g>
     </svg>
   `;
@@ -560,7 +568,7 @@ function renderCustomCard() {
 
   const cup = document.createElement('div');
   cup.className = 'cup-container';
-  cup.innerHTML = cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
+  cup.innerHTML = cupSvg({ color: cupColor, surfaceColor: cupSurfaceColor, size: 'lg', custom: true });
 
   const info = document.createElement('div');
   info.className = 'card-info';
@@ -830,7 +838,7 @@ function runPayDraw() {
     } else if (winner.base) {
       cupEl.innerHTML = cupSvg({ color: winner.base.color, surfaceColor: winner.base.surfaceColor, size: winner.base.cupSize, cold: winner.base.cold });
     } else {
-      cupEl.innerHTML = cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
+      cupEl.innerHTML = cupSvg({ color: cupColor, surfaceColor: cupSurfaceColor, size: 'lg', custom: true });
     }
     if (groupCount > 1) {
       const n = 1 + Math.floor(Math.random() * groupCount);
@@ -926,7 +934,7 @@ function dismissOnboarding() {
   tip.classList.add('hidden');
   try {
     localStorage.setItem(ONBOARDING_KEY, 'true');
-  } catch {}
+  } catch { }
 }
 
 function setupOnboardingDismissal() {
