@@ -139,7 +139,7 @@ let cupSvgIdCounter = 0;
 
 function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom = false, cold = false }) {
   const outlineColor = '#3e2723';
-  const steamColor = '#8d6e63';
+  const steamColor = '#a0949080';
   const gradientId = `steam-${++cupSvgIdCounter}`;
 
   if (custom) {
@@ -165,10 +165,10 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
     ? `<ellipse cx="43" cy="40" rx="27" ry="7" fill="${surfaceColor || color}"/>`
     : `<ellipse cx="43" cy="34" rx="17" ry="5" fill="${surfaceColor || color}"/>`;
 
-    const handle = cold
-  ? ''
-  : (isLarge
-    ? `<path
+  const handle = cold
+    ? ''
+    : (isLarge
+      ? `<path
         d="M71 46h5c6 0 9 3 9 7.5S82 61 76 61h-5"
         fill="none"
         stroke="${outlineColor}"
@@ -176,7 +176,7 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
         stroke-linecap="round"
         stroke-linejoin="round"
       />`
-    : `<path
+      : `<path
         d="M61 41h5c5 0 8 2.5 8 6.5S71 54 66 54h-5"
         fill="none"
         stroke="${outlineColor}"
@@ -188,17 +188,61 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
   const steam = cold
     ? ''
     : (isLarge
-      ? `<path d="M34 20c0-7 4-13 8-13s4 9 4 13-4 9-4 9 M50 16c0-9 5-15 10-15s5 11 5 15-5 11-5 11" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>`
-      : `<path d="M34 18c0-6 4-12 8-12s4 8 4 12-4 8-4 8 M50 14c0-8 5-14 10-14s5 10 5 14-5 10-5 10" fill="none" stroke="url(#${gradientId})" stroke-width="4" stroke-linecap="round"/>`);
+      ? `
+      <g
+        fill="none"
+        stroke="url(#${gradientId})"
+        stroke-width="3.2"
+        stroke-linecap="round"
+      >
+        <path d="M31 34 C24 29 38 25 31 19 C26 14 38 10 35 5"/>
+        <path d="M43 32 C37 27 50 23 43 17 C38 12 50 8 47 2"/>
+        <path d="M55 34 C49 29 62 25 55 19 C50 14 62 10 59 5"/>
+      </g>
+    `
+      : `
+      <g
+        fill="none"
+        stroke="url(#${gradientId})"
+        stroke-width="3"
+        stroke-linecap="round"
+      >
+        <path d="M33 28 C28 24 39 21 33 16 C29 12 39 9 37 4"/>
+        <path d="M43 27 C38 23 49 19 43 15 C39 11 49 7 47 2"/>
+        <path d="M53 28 C48 24 59 21 53 16 C49 12 59 9 57 4"/>
+      </g>
+    `);
 
   const defs = cold
     ? ''
-    : `<defs>
-        <linearGradient id="${gradientId}" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stop-color="${steamColor}" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="${steamColor}" stop-opacity="0"/>
-        </linearGradient>
-      </defs>`;
+    : `
+    <defs>
+      <linearGradient
+        id="${gradientId}"
+        gradientUnits="userSpaceOnUse"
+        x1="0"
+        y1="36"
+        x2="0"
+        y2="0"
+      >
+        <stop
+          offset="0%"
+          stop-color="${steamColor}"
+          stop-opacity="0.7"
+        />
+        <stop
+          offset="65%"
+          stop-color="${steamColor}"
+          stop-opacity="0.35"
+        />
+        <stop
+          offset="100%"
+          stop-color="${steamColor}"
+          stop-opacity="0"
+        />
+      </linearGradient>
+    </defs>
+  `;
 
   return `
     <svg class="cup cup-${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -313,10 +357,22 @@ function cornettoSvg({ color = '#f6c542' } = {}) {
 
 
 function createCupFlight(source) {
-  const icon = source?.querySelector('.cup') || source;
+  if (!source) return null;
+
+  const icon = source.matches?.('svg')
+    ? source
+    : source.querySelector?.('svg');
+
   if (!icon) return null;
+
+  const rect = icon.getBoundingClientRect();
+
+  if (rect.width <= 0 || rect.height <= 0) {
+    return null;
+  }
+
   return {
-    rect: icon.getBoundingClientRect(),
+    rect,
     node: icon.cloneNode(true)
   };
 }
@@ -329,36 +385,115 @@ function animatePress(element) {
 }
 
 function animateCoffeeToSummary(flight) {
-  if (!flight || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (
+    !flight ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return;
+  }
 
   const target = document.getElementById('fab');
   if (!target) return;
 
-  const end = target.getBoundingClientRect();
+  const destination = target.getBoundingClientRect();
   const clone = flight.node;
+
   clone.classList.add('flying-cup');
-  clone.style.left = `${flight.rect.left}px`;
-  clone.style.top = `${flight.rect.top}px`;
-  clone.style.width = `${flight.rect.width}px`;
-  clone.style.height = `${flight.rect.height}px`;
-  clone.style.opacity = '0.95';
-  clone.style.transform = 'translate(0, 0) scale(1)';
+
+  Object.assign(clone.style, {
+    left: `${flight.rect.left}px`,
+    top: `${flight.rect.top}px`,
+    width: `${flight.rect.width}px`,
+    height: `${flight.rect.height}px`,
+    opacity: '1',
+    transform: 'translate3d(0, 0, 0) scale(1)'
+  });
 
   document.body.appendChild(clone);
 
-  requestAnimationFrame(() => {
-    const targetX = end.left + end.width / 2 - flight.rect.width / 2;
-    const targetY = end.top + end.height / 2 - flight.rect.height / 2;
-    clone.style.transform = `translate(${targetX - flight.rect.left}px, ${targetY - flight.rect.top}px) scale(0.35)`;
-    clone.style.opacity = '0.1';
-  });
+  const destinationX =
+    destination.left +
+    destination.width / 2 -
+    (flight.rect.left + flight.rect.width / 2);
+
+  const destinationY =
+    destination.top +
+    destination.height / 2 -
+    (flight.rect.top + flight.rect.height / 2);
+
+  const curveHeight = Math.min(
+    130,
+    Math.max(65, Math.abs(destinationX) * 0.12)
+  );
+
+  const middleX = destinationX * 0.55;
+  const middleY = destinationY * 0.42 - curveHeight;
 
   const cleanup = () => {
-    if (clone.isConnected) clone.remove();
+    clone.remove();
   };
 
-  clone.addEventListener('transitionend', cleanup, { once: true });
-  setTimeout(cleanup, 700);
+  const pulseTarget = () => {
+    target.addEventListener(
+      'animationend',
+      () => target.classList.remove('receiving'),
+      { once: true }
+    );
+  };
+
+  // Fallback for older Safari versions.
+  if (typeof clone.animate !== 'function') {
+    clone.style.transition = [
+      'transform 720ms cubic-bezier(.22,.8,.24,1)',
+      'opacity 720ms ease'
+    ].join(', ');
+
+    requestAnimationFrame(() => {
+      clone.style.transform =
+        `translate3d(${destinationX}px, ${destinationY}px, 0) ` +
+        'scale(0.2) rotate(12deg)';
+
+      clone.style.opacity = '0.1';
+    });
+
+    window.setTimeout(pulseTarget, 560);
+    window.setTimeout(cleanup, 780);
+    return;
+  }
+
+  const animation = clone.animate(
+    [
+      {
+        transform: 'translate3d(0, 0, 0) scale(1) rotate(0deg)',
+        opacity: 1,
+        offset: 0
+      },
+      {
+        transform:
+          `translate3d(${middleX}px, ${middleY}px, 0) ` +
+          'scale(6) rotate(-5deg)',
+        opacity: 1,
+        offset: 0.55
+      },
+      {
+        transform:
+          `translate3d(${destinationX}px, ${destinationY}px, 0) ` +
+          'scale(0.2) rotate(5deg)',
+        opacity: 0.4,
+        offset: 1
+      }
+    ],
+    {
+      duration: 1020,
+      easing: 'cubic-bezier(.22,.8,.24,1)',
+      fill: 'forwards'
+    }
+  );
+
+  window.setTimeout(pulseTarget, 560);
+
+  animation.addEventListener('finish', cleanup, { once: true });
+  animation.addEventListener('cancel', cleanup, { once: true });
 }
 
 function renderGrid() {
@@ -541,12 +676,23 @@ function renderPastryCard() {
   plusBtn.innerHTML = '🥐 +';  // plusBtn.disabled = false;
   plusBtn.addEventListener('click', () => {
     animatePress(plusBtn);
-    const item = selected.custom.trim() ? { custom: selected.custom.trim() } : { option: selected.option };
+
+    const flight = createCupFlight(icon);
+
+    const item = selected.custom.trim()
+      ? { custom: selected.custom.trim() }
+      : { option: selected.option };
+
     pushItem(pastry.id, item);
-    selectedVariants[pastry.id] = { option: 'vuoto', custom: '' };
+
+    selectedVariants[pastry.id] = {
+      option: 'vuoto',
+      custom: ''
+    };
+
     renderGrid();
     renderSummary();
-    animateCoffeeToSummary(createCupFlight(icon));
+    animateCoffeeToSummary(flight);
   });
 
   right.appendChild(plusBtn);
@@ -701,6 +847,12 @@ function renderSummary() {
 
   const payBtn = document.getElementById('pay-btn');
   if (payBtn) payBtn.disabled = total === 0;
+
+  const copyBtn = document.getElementById('copy-btn');
+  if (copyBtn) copyBtn.disabled = total === 0;
+
+  const clearBtn = document.getElementById('reset-btn');
+  if (clearBtn) clearBtn.disabled = total === 0;
 
   if (entries.length === 0) {
     const li = document.createElement('li');
