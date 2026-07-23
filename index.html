@@ -9,7 +9,7 @@
 <body>
   <header class="topbar">
     <h1>☕ Contatore Caffè</h1>
-    <p>Seleziona le opzioni, premi il caffè, correggi in fondo.</p>
+    <p>Scegli i caffè e mostra il totale al/alla barista!</p>
   </header>
 
   <main class="grid" id="grid"></main>
@@ -43,10 +43,21 @@
     </div>
   </div>
 
+  <div id="cache-modal" class="pay-modal hidden" role="dialog" aria-modal="true" aria-labelledby="cache-title">
+    <div class="pay-card cache-card">
+      <h2 id="cache-title">Ordine precedente trovato</h2>
+      <p class="cache-text">Hai un ordine precedente salvato. Vuoi continuare da dove eri rimasto o iniziare un nuovo ordine?</p>
+      <div class="cache-actions">
+        <button id="cache-keep" class="btn btn-secondary">Continua ordine</button>
+        <button id="cache-wipe" class="btn btn-danger">Nuovo ordine</button>
+      </div>
+    </div>
+  </div>
+  <!--
   <div id="onboarding" class="onboarding" role="status" aria-live="polite">
     <span class="onboarding-text">Stai cercando il recap dei caffè? È stato spostato qua!</span>
     <span class="onboarding-arrow" aria-hidden="true"></span>
-  </div>
+  </div>-->
 
   <script src="app.js"></script>
 </body>

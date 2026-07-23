@@ -15,12 +15,20 @@ const bases = [
 
 const variantOptions = ['deca', 'soia', 'brutto'];
 const sizeOptions = ['piccola', 'grande'];
+const pastryOptions = ['vuoto', 'crema', 'cioccolato', 'pistacchio'];
+
+const pastries = [
+  { id: 'cornetto', name: 'Cornetto', color: '#f4c542', isPastry: true }
+];
 
 let stacks = loadStacks();
 let selectedVariants = {};
 
 bases.forEach(b => {
   selectedVariants[b.id] = { deca: false, soia: false, brutto: false, size: 'piccola' };
+});
+pastries.forEach(p => {
+  selectedVariants[p.id] = { option: 'vuoto', custom: '' };
 });
 selectedVariants.custom = { label: '' };
 
@@ -80,14 +88,18 @@ function variantKey(variants) {
 }
 
 function groupKey(base, item) {
+  if (base.isPastry) return item.custom || item.option || 'vuoto';
   if (base.hasSize) return item.size || 'piccola';
   return variantKey(item);
 }
 
 function displayName(base, item) {
   const parts = [base.name];
-  if (base.hasSize) parts.push(item.size || 'piccola');
-  else {
+  if (base.isPastry) {
+    parts.push(item.custom || item.option || 'vuoto');
+  } else if (base.hasSize) {
+    parts.push(item.size || 'piccola');
+  } else {
     if (item.deca) parts.push('deca');
     if (item.soia) parts.push('soia');
     if (item.brutto) parts.push('brutto');
@@ -182,6 +194,115 @@ function cupSvg({ color, surfaceColor, cupColor = '#ffffff', size = 'sm', custom
     </svg>
   `;
 }
+
+function cornettoSvg({ color = '#f6c542' } = {}) {
+  const outlineColor = '#3e2723';
+  const seamColor = '#c69c3e';
+  const detailColor = '#d6ad51';
+
+  return `
+    <svg
+      class="cornetto"
+      viewBox="0 20 100 60"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <!--
+        Reduce only the vertical proportions:
+        newY = 20 + originalY × 0.6
+      -->
+      <g
+        transform="translate(0 20) scale(1 0.6)"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <!-- Croissant body -->
+        <path
+          d="
+            M8 66
+            C8 36 28 16 50 17
+            C72 16 92 36 92 66
+            C92 75 89 82 84 88
+            C81 92 76 89 78 83
+            C80 76 80 70 77 63
+            C72 53 62 46 50 51
+            C38 46 28 53 23 63
+            C20 70 20 76 22 83
+            C24 89 19 92 16 88
+            C11 82 8 75 8 66
+            Z
+          "
+          fill="${color}"
+          stroke="${outlineColor}"
+          stroke-width="2.5"
+          vector-effect="non-scaling-stroke"
+        />
+
+        <!-- Soft baked highlight -->
+        <path
+          d="
+            M15 55
+            C19 37 32 24 46 20
+            C35 29 27 42 23 58
+            Z
+          "
+          fill="#fff"
+          opacity="0.12"
+          stroke="none"
+        />
+
+        <!-- Pastry segment lines -->
+        <path
+          d="M28 25 C35 33 38 42 38 50"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="2.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M42 19 C45 29 46 39 45 49"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="2.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M58 19 C55 29 54 39 55 49"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="2.4"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M72 25 C65 33 62 42 62 50"
+          fill="none"
+          stroke="${seamColor}"
+          stroke-width="2.4"
+          vector-effect="non-scaling-stroke"
+        />
+
+        <!-- End shaping -->
+        <path
+          d="M17 69 C17 61 19 55 23 49"
+          fill="none"
+          stroke="${detailColor}"
+          stroke-width="1.5"
+          opacity="0.8"
+          vector-effect="non-scaling-stroke"
+        />
+        <path
+          d="M83 69 C83 61 81 55 77 49"
+          fill="none"
+          stroke="${detailColor}"
+          stroke-width="1.5"
+          opacity="0.8"
+          vector-effect="non-scaling-stroke"
+        />
+      </g>
+    </svg>
+  `;
+}
+
 
 function createCupFlight(source) {
   const icon = source?.querySelector('.cup') || source;
@@ -331,7 +452,101 @@ function renderGrid() {
     grid.appendChild(card);
   });
 
+  grid.appendChild(renderPastryCard());
   grid.appendChild(renderCustomCard());
+}
+
+function renderPastryCard() {
+  const pastry = pastries[0];
+  const selected = selectedVariants[pastry.id];
+
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const left = document.createElement('div');
+  left.className = 'card-left';
+
+  const icon = document.createElement('div');
+  icon.className = 'cup-container';
+  icon.innerHTML = cornettoSvg({ color: pastry.color });
+
+  const info = document.createElement('div');
+  info.className = 'card-info';
+
+  const title = document.createElement('h2');
+  title.className = 'card-title';
+  title.textContent = pastry.name;
+
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+
+  pastryOptions.forEach(opt => {
+    const chip = document.createElement('button');
+    chip.className = 'btn btn-ghost btn-pill btn-sm chip';
+    chip.textContent = opt;
+    chip.setAttribute('aria-pressed', String(selected.option === opt && !selected.custom.trim()));
+    chip.disabled = selected.custom.trim() !== '';
+    chip.addEventListener('click', () => {
+      animatePress(chip);
+      selected.option = opt;
+      selected.custom = '';
+      renderGrid();
+      renderSummary();
+    });
+    chips.appendChild(chip);
+  });
+
+  const input = document.createElement('input');
+  input.className = 'custom-input';
+  input.type = 'text';
+  input.placeholder = 'es. marmellata, nutella...';
+  input.value = selected.custom;
+
+  const label = document.createElement('p');
+  label.className = 'variant-label';
+  label.textContent = selected.custom.trim() ? `prossimo: ${selected.custom.trim()}` : `prossimo: ${selected.option}`;
+
+  input.addEventListener('input', () => {
+    selected.custom = input.value;
+    const hasText = selected.custom.trim() !== '';
+    chips.querySelectorAll('.chip').forEach(chip => {
+      chip.disabled = hasText;
+      chip.setAttribute('aria-pressed', 'false');
+    });
+    label.textContent = hasText ? `prossimo: ${selected.custom.trim()}` : `prossimo: ${selected.option}`;
+  });
+
+  info.appendChild(title);
+  info.appendChild(chips);
+  info.appendChild(input);
+  info.appendChild(label);
+
+  left.appendChild(icon);
+  left.appendChild(info);
+
+  const right = document.createElement('div');
+  right.className = 'card-right';
+
+  const plusBtn = document.createElement('button');
+  plusBtn.className = 'btn btn-primary btn-lg btn-icon';
+  plusBtn.setAttribute('aria-label', `Aggiungi ${pastry.name}`);
+  plusBtn.innerHTML = '🥐 +';  // plusBtn.disabled = false;
+  plusBtn.addEventListener('click', () => {
+    animatePress(plusBtn);
+    const item = selected.custom.trim() ? { custom: selected.custom.trim() } : { option: selected.option };
+    pushItem(pastry.id, item);
+    selectedVariants[pastry.id] = { option: 'vuoto', custom: '' };
+    renderGrid();
+    renderSummary();
+    animateCoffeeToSummary(createCupFlight(icon));
+  });
+
+  right.appendChild(plusBtn);
+
+  card.appendChild(left);
+  card.appendChild(right);
+
+  return card;
 }
 
 function renderCustomCard() {
@@ -436,6 +651,25 @@ function aggregateStacks() {
     });
   });
 
+  pastries.forEach(pastry => {
+    const groups = {};
+    (stacks[pastry.id] || []).forEach(item => {
+      const key = item.custom || item.option || 'vuoto';
+      groups[key] = (groups[key] || 0) + 1;
+      total += 1;
+    });
+
+    Object.entries(groups).forEach(([key, count]) => {
+      const item = key.includes(' ') ? { custom: key } : { option: key };
+      entries.push({
+        id: pastry.id,
+        key,
+        name: displayName(pastry, item),
+        count
+      });
+    });
+  });
+
   return { entries, total };
 }
 
@@ -464,7 +698,7 @@ function renderSummary() {
     const li = document.createElement('li');
     const span = document.createElement('span');
     span.className = 'empty';
-    span.textContent = 'Nessun caffè ordinato. Inizia a premere le tazzine!';
+    span.textContent = 'Nessun ordine. Inizia a premere i pulsanti!';
     li.appendChild(span);
     list.appendChild(li);
     return;
@@ -490,7 +724,7 @@ function renderSummary() {
       if (entry.id === 'custom') {
         removeLastCustom(entry.label);
       } else {
-        const base = bases.find(b => b.id === entry.id);
+        const base = bases.find(b => b.id === entry.id) || pastries.find(p => p.id === entry.id);
         removeLastMatching(base, entry.key);
       }
       renderGrid();
@@ -544,6 +778,15 @@ function buildTicketPool() {
       });
     });
   });
+  pastries.forEach(pastry => {
+    (stacks[pastry.id] || []).forEach(item => {
+      pool.push({
+        base: pastry,
+        name: displayName(pastry, item),
+        groupId: `${pastry.id}|${groupKey(pastry, item)}`
+      });
+    });
+  });
   (stacks.custom || []).forEach(item => {
     pool.push({ base: null, name: item.label, groupId: `custom|${item.label}` });
   });
@@ -582,9 +825,13 @@ function runPayDraw() {
     paySpinning = false;
     drinkEl.textContent = winner.name;
     drinkEl.classList.add('revealed');
-    cupEl.innerHTML = winner.base
-      ? cupSvg({ color: winner.base.color, surfaceColor: winner.base.surfaceColor, size: winner.base.cupSize, cold: winner.base.cold })
-      : cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
+    if (winner.base?.isPastry) {
+      cupEl.innerHTML = cornettoSvg({ color: winner.base.color });
+    } else if (winner.base) {
+      cupEl.innerHTML = cupSvg({ color: winner.base.color, surfaceColor: winner.base.surfaceColor, size: winner.base.cupSize, cold: winner.base.cold });
+    } else {
+      cupEl.innerHTML = cupSvg({ color: '#607d8b', surfaceColor: '#eceff1', size: 'lg', custom: true });
+    }
     if (groupCount > 1) {
       const n = 1 + Math.floor(Math.random() * groupCount);
       const start = tiebreakStarts[Math.floor(Math.random() * tiebreakStarts.length)];
@@ -618,6 +865,35 @@ function resetAll() {
     renderGrid();
     renderSummary();
   }
+}
+
+function hasCachedOrder() {
+  return Object.keys(stacks).length > 0;
+}
+
+function openCacheModal() {
+  document.getElementById('cache-modal').classList.remove('hidden');
+}
+
+function closeCacheModal() {
+  document.getElementById('cache-modal').classList.add('hidden');
+}
+
+function keepCachedOrder() {
+  closeCacheModal();
+  render();
+  setupOnboardingDismissal();
+  if (!shouldShowOnboarding()) {
+    document.getElementById('onboarding')?.classList.add('hidden');
+  }
+}
+
+function wipeCacheAndRestart() {
+  stacks = {};
+  saveStacks();
+  renderGrid();
+  renderSummary();
+  closeCacheModal();
 }
 
 function openSummary() {
@@ -669,11 +945,28 @@ function render() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  render();
-  setupOnboardingDismissal();
-  if (!shouldShowOnboarding()) {
-    document.getElementById('onboarding')?.classList.add('hidden');
+  if (hasCachedOrder()) {
+    openCacheModal();
+  } else {
+    render();
+    setupOnboardingDismissal();
+    if (!shouldShowOnboarding()) {
+      document.getElementById('onboarding')?.classList.add('hidden');
+    }
   }
+
+  document.getElementById('cache-keep').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    keepCachedOrder();
+  });
+  document.getElementById('cache-wipe').addEventListener('click', (e) => {
+    animatePress(e.currentTarget);
+    wipeCacheAndRestart();
+  });
+  document.getElementById('cache-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) keepCachedOrder();
+  });
+
   document.getElementById('copy-btn').addEventListener('click', (e) => {
     animatePress(e.currentTarget);
     copyOrder();
@@ -709,8 +1002,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key !== 'Escape') return;
     if (!document.getElementById('pay-modal').classList.contains('hidden')) {
       closePayModal();
-    } else {
-      closeSummary();
+      return;
     }
+    if (!document.getElementById('cache-modal').classList.contains('hidden')) {
+      keepCachedOrder();
+      return;
+    }
+    closeSummary();
   });
 });
